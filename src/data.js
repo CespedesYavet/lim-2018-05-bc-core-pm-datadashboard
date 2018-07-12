@@ -97,7 +97,9 @@ window.computeUsersStats = (users, progress, courses) => {
   // console.log(usersWithStats[0]);
   return usersWithStats
 }
-  
+// windown.sortUsers = (users, orderBy, orderDirection)=>{
+
+// }
 
 window.filterUsers = (users, search) => {
   const filterUsers = users.filter(userFilter => userFilter.name.toLowerCase().indexOf(search.toLowerCase())>-1 )
@@ -107,8 +109,8 @@ window.filterUsers = (users, search) => {
 }
 
 window.processCohortData = (options) => {
-  const courses = Object.keys(options.cohort.coursesIndex);//Devuelve un array con las 
-  let estudiantes = computeUsersStats(options.cohortData.users,options.cohortData.progress, courses);//enviando las propiedades users,progress,courses.
+  const courses = Object.keys(options.cohort.coursesIndex); //Devuelve un array con las 
+  let estudiantes = computeUsersStats(options.cohortData.users,options.cohortData.progress, courses); //enviando las propiedades users,progress,courses.
   //let estudiantesOrdenados = sortUsers(estudiantes, options.sortBy, options.orderDirection);
   
   let filtrandoUsuarios = filterUsers(estudiantes, options.search);

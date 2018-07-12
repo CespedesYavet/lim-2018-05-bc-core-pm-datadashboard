@@ -112,6 +112,7 @@ function dataUsers() { //Detecta la cohort de preadmisión e imprime sus users e
       orderDirection: 'DESC', 
       search: filterName.value
     }
+    
     let userStats = processCohortData(options);
 
     // console.log("window.usersWithStats",window.usersWithStats);  
