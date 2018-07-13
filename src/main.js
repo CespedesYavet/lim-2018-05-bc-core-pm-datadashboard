@@ -21,26 +21,17 @@ const getData = (callback) => {
 }
 const callbackGetData = (users, progress, cohorts) => {
   cohortSelect(cohorts);
+}
+//FIN DROPDOWN COHORTS
 
-  // esta seria la forma global (todos los cohorts)
-  // let courses = [];
-  // cohorts.forEach( cohort => {
-  //   // console.log(cohort.coursesIndex)
-  //   courses.push(cohort.coursesIndex)
-  // })
-  // const cohort = cohorts.find(item => item.id === 'lim-2018-03-pre-core-pw');
-  // const courses = Object.keys(cohort.coursesIndex);
-  // console.log(courses);
-  // const options = {cohort: cohort, cohortData: {users: users, progress: progress}, sortBy: '', orderDirection: '', search: ''}
-  // window.userWithStats = processCohortData(options);
-  // window.usersWithStats = computeUsersStats(users, progress, courses);
-
-  // console.log(users)
+countryOnChange = () => {
+  let cohortFilter = window.cohorts.filter(item => (item.id.slice(0, 3) == dropdownOne.value));
+  cohortSelect(cohortFilter);
 }
 
 getData(callbackGetData); // promise.all de los fetch con todos los datos
 
-// INICIO DROPDOWN PAISES
+//////////////////////////////////////// INICIO DROPDOWN PAISES
 let dropdownOne = document.getElementById('countryDropdown'); //Asociando JS y HTML
 dropdownOne.length = 0;
 let defaultOptionCountry = document.createElement('option'); //Definiendo el option por defecto
@@ -64,10 +55,14 @@ const countrySelector = (optionCountry) => { // Función que asignma nombres de 
   })
 };
 countrySelector(dropdownOne);
-//FIN DROPDOWN PAISES
+////////////////////////////////////////FIN DROPDOWN PAISES
 
-//INICIO DROPDOWN COHORTS
+////////////////////////////////////////INICIO DROPDOWN COHORTS
 let dropdown = document.getElementById('cohortsDropdown'); //Asociando JS y HTML
+
+dropdown.addEventListener('change', (evt) => {
+  dataUsers(evt.target.value);
+});
 
 const cohortSelect = (cohort) => {
   dropdown.length = 0;
@@ -84,38 +79,65 @@ const cohortSelect = (cohort) => {
     dropdown.add(option);
   }
 }
-//FIN DROPDOWN COHORTS
+////////////////////////////////////////FIN DROPDOWN COHORTS
+
+////////////////////////////////////////DROPDOWN ORDER
+let orderSelect = document.getElementById('order');
+let orderDirectionSelected = document.getElementById('orderDirection');
+
+orderSelect.addEventListener('change', (e) =>{
+  const valueSelect = orderSelect.value
+  cohorts.forEach(elementCohort => {
+    if (elementCohort.id === valueSelect) {
+      options.cohort = elementCohort;
+    }
+  })
+options.orderBy = orderSelect.value;
+console.log(options);
+
+// let userStats = processCohortData(options);
+});
+
+orderDirectionSelected.addEventListener('change', () => {
+  options.orderDirection = orderDirectionSelected.value;
+  let userStats = processCohortData(options);
+  tableCreater(userStats);
+});
+
+//////////////////////////////////////// FIN DROPDOWN ORDER
+
+
+
+const options = {cohort: {}, cohortData: {users: [], progress: []}, orderBy: '', orderDirection: '', search: ''}
+const filterName = document.getElementById('writeNamesUsers'); // Llama al input de búsqueda
 
 countryOnChange = () => {
   let cohortFilter = window.cohorts.filter(item => (item.id.slice(0, 3) == dropdownOne.value));
   cohortSelect(cohortFilter);
 }
 
-//IMPRIME USUARIOS DE LIM PRECORE 2018
-function dataUsers() { //Detecta la cohort de preadmisión e imprime sus users en el HTML
-  let lim = document.getElementById('cohortsDropdown').value;
-  // console.log(lim);
-  if (lim === "lim-2018-03-pre-core-pw") {
+//////////////////////////////////////// DETECTA E IMPRIME USUARIOS DE LIM PRECORE 2018
+function dataUsers(selectedCohort) { //Detecta la cohort de preadmisión e imprime sus users en el HTML
+  if (selectedCohort !== "lim-2018-03-pre-core-pw") {
+    return;
+  }
     const cohort = cohorts.find(item => item.id === 'lim-2018-03-pre-core-pw');
     const courses = Object.keys(cohort.coursesIndex);
-    //window.usersWithStats = computeUsersStats(users, progress, courses);
-
-    const filterName = document.getElementById('writeNamesUsers');
-
-    const options = {
-      cohort: cohort, 
-      cohortData:{
-        users: users, 
-        progress: progress
-      }, 
-      sortBy: 'nombre', 
-      orderDirection: 'DESC', 
-      search: filterName.value
-    }
+    // const options = {cohort: cohort, cohortData: {users: users, progress: progress}, sortBy: '', orderDirection: '', search: filterName.value}
+    options.cohort = cohort;
+    options.cohortData.users = users;
+    options.cohortData.progress = progress;
+    // options.sortBy = orderSelect.value;
+    options.search = filterName.value;
     let userStats = processCohortData(options);
+    tableCreater(userStats);   
+}
 
-    // console.log("window.usersWithStats",window.usersWithStats);  
-    let tableContainer = document.createElement('div');
+//////////////////////////////////////// FUNCIÓN QUE CREA LA TABLA
+let tableCreater = (userStats) => {
+
+  let tableContainer = document.createElement('div');
+  six.innerHTML = '';
     tableContainer.classList = "container-table"
     let table = document.createElement('table');
     table.classList = "table";
@@ -123,7 +145,8 @@ function dataUsers() { //Detecta la cohort de preadmisión e imprime sus users e
     tableHead.classList = "thead-dark";
     tableHead.innerHTML += '<th>Alumnas</th><th>Completitud general</th><th>Ejecicios completados</th><th>%</th><th>L. completadas</th><th>% Lecturas</th><th>Quizzes completados</th><th>% Quizzes</th><th>scoreSum</th><th>scoreAvg</th>';
     table.appendChild(tableHead);
-
+  
+    
     userStats.forEach(user => {
       // console.log(user);
       let tableRow = document.createElement('tr');
@@ -141,22 +164,22 @@ function dataUsers() { //Detecta la cohort de preadmisión e imprime sus users e
       tableRow.innerHTML += '<td>' + user.stats.quizzes.scoreSum + '</td>';
       tableRow.innerHTML += '<td>' + user.stats.quizzes.scoreAvg + '</td>';
       table.appendChild(tableRow);
+
     })
+
     tableContainer.appendChild(table);
     six.appendChild(tableContainer);
-  }
 }
-dropdown.addEventListener('change', (evt) => {
-  dataUsers();
-});
+//////////////////////////////////////// FIN DE TABLE CREATER
 
-function login(form){
-  if(form.id.value == 'Yavet'){
-    if(form.pass.value == 'Cespedes'){
-      location="index.html"
-    }
-  }
-  else{
-    alert("Ingrese usuario y contrseña correctos");
-  }
-}
+
+// function login(form){
+//   if(form.id.value == 'Yavet'){
+//     if(form.pass.value == 'Cespedes'){
+//       location="index.html"
+//     }
+//   }
+//   else{
+//     alert("Ingrese usuario y contrseña correctos");
+//   }
+// }
